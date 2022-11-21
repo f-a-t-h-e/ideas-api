@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+// import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import {
   // BeforeInsert,
   Column,
@@ -13,15 +14,18 @@ export class Idea {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ApiProperty()
+  // @ApiProperty()
   @Column('text')
   idea: string;
 
-  @ApiProperty()
+  // @ApiProperty()
   @Column('text')
   description: string;
 
-  @ApiProperty()
+  // @ApiProperty()
+  // @CreateDateColumn({ select: false })
+  // @Exclude({ toPlainOnly: true })
+  @Exclude()
   @CreateDateColumn()
   createdAt: Date;
 }

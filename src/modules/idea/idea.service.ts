@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -25,29 +25,40 @@ export class IdeaService {
     This action returns all idea
     */
   async findAll(): Promise<Idea[]> {
-    return await this.ideaRepository.find();
+    const ideas = await this.ideaRepository.find();
+    if (!ideas)
+      throw new HttpException('There are no ideas', HttpStatus.NOT_FOUND);
+    return ideas;
   }
   /* 
     This action returns a #${id} idea
     */
 
-  async findOne(id: string): Promise<Idea | null> {
-    return await this.ideaRepository.findOneBy({ id });
+  async findOne(id: string): Promise<Idea> {
+    const idea = await this.ideaRepository.findOne({ where: { id } });
+    if (!idea)
+      throw new HttpException(
+        `There is no idea with this id #${id}`,
+        HttpStatus.NOT_FOUND,
+      );
+    return idea;
   }
 
   async findMany(queries: Partial<Idea>): Promise<Idea[]> {
-    return await this.ideaRepository.find({ where: queries });
+    const ideas = await this.ideaRepository.find({ where: queries });
+    if (!ideas)
+      throw new HttpException(
+        `No ideas for these filters`,
+        HttpStatus.NOT_FOUND,
+      );
+    return ideas;
   }
 
   /*
   This action updates a #${id} idea
   */
-  async update(
-    id: string,
-    updateIdeaDto: UpdateIdeaDto,
-  ): Promise<Idea | null | string> {
-    if ((await this.findOne(id)) === null)
-      return `The idea #${id} doesn't exist`;
+  async update(id: string, updateIdeaDto: UpdateIdeaDto): Promise<Idea> {
+    await this.findOne(id);
     await this.ideaRepository.update({ id }, updateIdeaDto);
     return this.findOne(id);
   }
@@ -55,10 +66,9 @@ export class IdeaService {
   /*
   This action removes a #${id} idea
   */
-  async remove(id: string): Promise<{ deleted: boolean } | string> {
-    if ((await this.findOne(id)) === null)
-      return `The idea #${id} is deleted already`;
+  async remove(id: string): Promise<Idea> {
+    const idea = await this.findOne(id);
     await this.ideaRepository.delete({ id });
-    return { deleted: true };
+    return idea;
   }
 }

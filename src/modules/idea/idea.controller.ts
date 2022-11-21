@@ -9,21 +9,24 @@ import {
   Query,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Logger,
+  // UsePipes,
 } from '@nestjs/common';
 import { IdeaService } from './idea.service';
 import { CreateIdeaDto } from './dto/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { Idea } from './entities/idea.entity';
-import { ClassTransformer } from 'class-transformer';
 
-@UseInterceptors(ClassSerializerInterceptor)
-@UseInterceptors(ClassTransformer)
 @Controller('idea')
 export class IdeaController {
   constructor(private readonly ideaService: IdeaService) {}
 
+  private Logger = new Logger('IdeaController');
+  // private Logger = new Logger(this.constructor.name);
+
   @Post()
-  create(@Body() createIdeaDto: CreateIdeaDto) {
+  create(@Body() createIdeaDto: CreateIdeaDto): Promise<Idea> {
+    this.Logger.log(JSON.stringify(createIdeaDto));
     return this.ideaService.create(createIdeaDto);
   }
 
@@ -33,22 +36,26 @@ export class IdeaController {
   }
 
   @Get(':id')
-  findOneById(@Param('id') id: string): Promise<Idea | null> {
+  findOneById(@Param('id') id: string): Promise<Idea> {
     return this.ideaService.findOne(id);
   }
 
   @Get()
-  getMany(@Query() queries: Partial<Idea>): Promise<Idea[] | []> {
+  getMany(@Query() queries: Partial<Idea>): Promise<Idea[]> {
     return this.ideaService.findMany(queries);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateIdeaDto: UpdateIdeaDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateIdeaDto: UpdateIdeaDto,
+  ): Promise<Idea> {
+    this.Logger.log(JSON.stringify(updateIdeaDto));
     return this.ideaService.update(id, updateIdeaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<{ deleted: boolean } | string> {
+  remove(@Param('id') id: string): Promise<Idea> {
     return this.ideaService.remove(id);
   }
 }
