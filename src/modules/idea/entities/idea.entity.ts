@@ -1,23 +1,27 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
-  BeforeInsert,
+  // BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  // UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'ideas' })
 export class Idea {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @ApiProperty()
   @Column('text')
   idea: string;
 
+  @ApiProperty()
   @Column('text')
   description: string;
 
+  @ApiProperty()
   @CreateDateColumn()
   createdAt: Date;
 }
