@@ -8,11 +8,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({ usernameField: 'email' });
   }
-
+  // password-local will take care of making sure that email and password are provided
   async validate(email: string, password: string) {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException('Wrong credentials provided'); // No need for this
+      throw new UnauthorizedException('Wrong credentials provided'); // Not necessary
     }
     return user;
   }

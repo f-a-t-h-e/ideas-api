@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { url } from 'inspector';
 
 @Catch()
 export class HttpErrorFilter implements ExceptionFilter {
@@ -37,19 +36,30 @@ export class HttpErrorFilter implements ExceptionFilter {
 
     response.status(status);
     response.header('Content-Type', 'application/json; charset=utf-8');
-    response.send(errorResponse);
+    if (exception.response) {
+      response.send(exception.response);
+    } else {
+      response.send(errorResponse);
+    }
+    console.log('this is sent to user');
 
     Logger.error(
       `${request.method} ${url}`,
       JSON.stringify(errorResponse),
       'ExceptionFilter',
     );
+    const getClassOf = Function.prototype.call.bind(Object.prototype.toString);
+
     console.log('---------------------------');
+
+    console.log(getClassOf(exception));
 
     console.log('This is for dev');
 
-    console.log(exception);
+    console.log(exception.response);
 
     console.log('^-------------------------^');
+
+    console.log(exception);
   }
 }

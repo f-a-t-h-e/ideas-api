@@ -1,12 +1,16 @@
 import 'dotenv/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  // ValidationPipe,
+} from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from './shared/validation/validation.pipe';
+import { ValidationPipe } from './shared/validation/validation.pipe'; // castom validation
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

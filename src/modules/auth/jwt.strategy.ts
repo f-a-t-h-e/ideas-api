@@ -18,9 +18,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ]),
       ignoreExpiration: false, // default already
       secretOrKey: configService.get('JWT_ACCESS_TOKEN_SECRET'),
+      // secretOrKey: process.env.JWT_ACCESS_TOKEN_SECRET, // same value
     });
   }
   async validate(payload: any) {
-    return { userId: payload.sub, username: payload.username };
+    return { id: payload.sub, username: payload.username };
   }
 }
