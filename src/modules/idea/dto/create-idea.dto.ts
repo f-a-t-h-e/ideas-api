@@ -7,13 +7,13 @@ export class CreateIdeaDto {
   @ApiHideProperty()
   id: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   @ApiProperty()
   idea: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   @ApiProperty()
   description: string;
 }

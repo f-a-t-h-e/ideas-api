@@ -15,11 +15,11 @@ export class Idea {
   id: string;
 
   // @ApiProperty()
-  @Column('text')
+  @Column()
   idea: string;
 
   // @ApiProperty()
-  @Column('text')
+  @Column()
   description: string;
 
   // @ApiProperty()

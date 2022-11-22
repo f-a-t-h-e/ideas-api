@@ -10,20 +10,25 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   Logger,
+  UseGuards,
   // UsePipes,
 } from '@nestjs/common';
 import { IdeaService } from './idea.service';
 import { CreateIdeaDto } from './dto/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { Idea } from './entities/idea.entity';
+import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller('idea')
+@ApiTags('ideas')
+@Controller('ideas')
 export class IdeaController {
   constructor(private readonly ideaService: IdeaService) {}
 
   private Logger = new Logger('IdeaController');
   // private Logger = new Logger(this.constructor.name);
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createIdeaDto: CreateIdeaDto): Promise<Idea> {
     this.Logger.log(JSON.stringify(createIdeaDto));

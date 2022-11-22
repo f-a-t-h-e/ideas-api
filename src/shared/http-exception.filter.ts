@@ -44,5 +44,12 @@ export class HttpErrorFilter implements ExceptionFilter {
       JSON.stringify(errorResponse),
       'ExceptionFilter',
     );
+    console.log('---------------------------');
+
+    console.log('This is for dev');
+
+    console.log(exception);
+
+    console.log('^-------------------------^');
   }
 }

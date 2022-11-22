@@ -4,9 +4,14 @@ import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from './shared/validation/validation.pipe';
-const port = process.env.PORT || 3000;
+import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+const port = process.env.PORT || 3001;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(helmet());
+  app.use(cookieParser());
 
   // Add swegger
   const swaggerConfig = new DocumentBuilder()
