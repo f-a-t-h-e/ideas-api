@@ -1,6 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsEmail, IsEmpty, IsNotEmpty, IsString } from 'class-validator';
+import { User } from '../../user/entities/user.entity';
 
 export class CreateIdeaDto {
   @IsEmpty()

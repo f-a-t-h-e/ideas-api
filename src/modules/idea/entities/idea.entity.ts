@@ -1,31 +1,18 @@
-// import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
-import {
-  // BeforeInsert,
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  // UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { CustomEntity } from '../../../shared/entities/id-create-update.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'ideas' })
-export class Idea {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  // @ApiProperty()
+export class Idea extends CustomEntity {
   @Column()
   idea: string;
 
-  // @ApiProperty()
   @Column()
   description: string;
 
-  // @ApiProperty()
-  // @CreateDateColumn({ select: false })
-  // @Exclude({ toPlainOnly: true })
-  @Exclude()
-  @CreateDateColumn()
-  createdAt: Date;
+  @Column({ select: true })
+  updated_at: Date;
+
+  @ManyToOne(type => User, user => user.ideas)
+  author: User;
 }

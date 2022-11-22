@@ -1,14 +1,12 @@
 import {
   NotFoundException,
   Injectable,
-  BadRequestException,
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
-import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
@@ -34,22 +32,22 @@ export class UserService {
   /*
    * This is for login
    */
-  async login({ email, password }: LoginDto): Promise<'token'> {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .where({ email })
-      .addSelect('user.password')
-      .getOne();
+  // async login({ email, password }: LoginDto): Promise<'token'> {
+  //   const user = await this.userRepository
+  //     .createQueryBuilder('user')
+  //     .where({ email })
+  //     .addSelect('user.password')
+  //     .getOne();
 
-    if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`); // Send "Wrong credentials provided"
-    }
-    if (!User.comparePassword(password, user.password)) {
-      // Send "Wrong credentials provided"
-      throw new BadRequestException('Invalid password');
-    } // To secure "brute-forcing" attacks
-    return 'token';
-  }
+  //   if (!user) {
+  //     throw new NotFoundException(`No user found for email: ${email}`); // Send "Wrong credentials provided"
+  //   }
+  //   if (!User.comparePassword(password, user.password)) {
+  //     // Send "Wrong credentials provided"
+  //     throw new BadRequestException('Invalid password');
+  //   } // To secure "brute-forcing" attacks
+  //   return 'token';
+  // }
 
   /* 
     This action adds a new user
@@ -95,7 +93,10 @@ export class UserService {
     */
 
   async findOne(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['ideas'],
+    });
 
     if (!user)
       throw new NotFoundException(`There is no user with this id #${id}`);

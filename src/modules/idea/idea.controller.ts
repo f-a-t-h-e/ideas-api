@@ -7,10 +7,9 @@ import {
   Param,
   Delete,
   Query,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Logger,
   UseGuards,
+  Req,
   // UsePipes,
 } from '@nestjs/common';
 import { IdeaService } from './idea.service';
@@ -19,6 +18,8 @@ import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { Idea } from './entities/idea.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import RequestWithUser from '../auth/types/requestWithUser.interface';
+import { UserParam } from '../user/user.param.decorator';
 
 @ApiTags('ideas')
 @Controller('ideas')
@@ -30,9 +31,13 @@ export class IdeaController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createIdeaDto: CreateIdeaDto): Promise<Idea> {
-    this.Logger.log(JSON.stringify(createIdeaDto));
-    return this.ideaService.create(createIdeaDto);
+  create(
+    @Body() createIdeaDto: CreateIdeaDto,
+    @Req() req: RequestWithUser,
+  ): Promise<Idea> {
+    const { user } = req;
+    this.Logger.log(JSON.stringify({ user, createIdeaDto }));
+    return this.ideaService.create(user, createIdeaDto);
   }
 
   @Get()
@@ -50,17 +55,23 @@ export class IdeaController {
     return this.ideaService.findMany(queries);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateIdeaDto: UpdateIdeaDto,
+    @UserParam('id') userId: string,
   ): Promise<Idea> {
-    this.Logger.log(JSON.stringify(updateIdeaDto));
-    return this.ideaService.update(id, updateIdeaDto);
+    this.Logger.log(JSON.stringify({ updateIdeaDto, user: id }));
+    return this.ideaService.update(userId, id, updateIdeaDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<Idea> {
-    return this.ideaService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @UserParam('id') userId: string,
+  ): Promise<Idea> {
+    return this.ideaService.remove(userId, id);
   }
 }
