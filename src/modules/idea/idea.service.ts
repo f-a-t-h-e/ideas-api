@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +18,7 @@ import { Idea } from './entities/idea.entity';
 export class IdeaService {
   constructor(
     @InjectRepository(Idea) private ideaRepository: Repository<Idea>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
   /* 
@@ -38,8 +41,12 @@ export class IdeaService {
   /* 
     This action returns all idea
     */
-  async findAll(): Promise<Idea[]> {
-    const ideas = await this.ideaRepository.find({ relations: ['author'] });
+  async findAll(): Promise<any> {
+    const ideas = await this.ideaRepository.find({
+      // relations: { up_votes: true, down_votes: true, author: true },
+    });
+    console.log(JSON.stringify(ideas));
+
     if (!ideas)
       throw new HttpException('There are no ideas', HttpStatus.NOT_FOUND);
     return ideas;
@@ -51,7 +58,12 @@ export class IdeaService {
   async findOne(id: string): Promise<Idea> {
     const idea = await this.ideaRepository.findOne({
       where: { id },
-      relations: ['author'],
+      relations: {
+        author: true,
+        up_votes: true,
+        down_votes: true,
+        comments: true,
+      },
     });
     if (!idea)
       throw new HttpException(
@@ -114,5 +126,120 @@ export class IdeaService {
     }
     await this.ideaRepository.delete({ id });
     return idea;
+  }
+
+  async bookmark(userId: string, id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: { bookmarks: true },
+      select: { bookmarks: true },
+    });
+    if (!!user) {
+      const idea = await this.ideaRepository.findOneBy({ id });
+      if (idea) {
+        user.bookmarks.push(idea);
+        return await this.userRepository.save(user);
+      }
+      throw new NotFoundException("Couldn't find this idea");
+    }
+    throw new InternalServerErrorException("coodn't bookmark");
+  }
+
+  async unbookmark(userId: string, id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: { bookmarks: true },
+      select: { bookmarks: true },
+    });
+    if (!!user) {
+      user.bookmarks = user.bookmarks.filter(idea => idea.id !== id);
+      return await this.userRepository.save(user);
+    }
+    throw new InternalServerErrorException("coodn't unbookmark");
+  }
+
+  async upVote(userId: string, id: string) {
+    const idea = await this.ideaRepository.findOne({
+      select: { up_votes: true, down_votes: true },
+      where: { id },
+      relations: { up_votes: true, down_votes: true },
+    });
+    if (!!idea) {
+      idea.down_votes.map(user => {
+        if (user.id === userId) return undefined;
+        return user;
+      });
+      if (idea.up_votes.filter(user => user.id === userId).length < 1) {
+        const user = await this.userRepository.findOneBy({ id: userId });
+        if (user) {
+          idea.up_votes.push(user);
+        } else {
+          throw new InternalServerErrorException(
+            `Couldn't UpVote, the user maybe deleted`,
+          );
+        }
+      }
+      return await this.ideaRepository.save(idea); // you don't need to return this
+    }
+    throw new InternalServerErrorException(
+      `Couldn't UpVote, the idea maybe deleted`,
+    );
+  }
+
+  async downVote(userId: string, id: string) {
+    const idea = await this.ideaRepository.findOne({
+      select: { up_votes: true, down_votes: true },
+      where: { id },
+      relations: { up_votes: true, down_votes: true },
+    });
+    if (!!idea) {
+      idea.up_votes.map(user => {
+        if (user.id === userId) return undefined;
+        return user;
+      });
+      if (idea.down_votes.filter(user => user.id === userId).length < 1) {
+        const user = await this.userRepository.findOneBy({ id: userId });
+        if (user) {
+          idea.down_votes.push(user);
+        } else {
+          throw new InternalServerErrorException(
+            `Couldn't downVote, the user maybe deleted`,
+          );
+        }
+      }
+      return await this.ideaRepository.save(idea); // you don't need to return this
+    }
+    throw new InternalServerErrorException(
+      `Couldn't downVote, the idea maybe deleted`,
+    );
+  }
+
+  async unUpVote(userId: string, id: string) {
+    const idea = await this.ideaRepository.findOne({
+      select: { up_votes: true },
+      where: { id },
+      relations: { up_votes: true },
+    });
+    if (idea) {
+      idea.up_votes = idea.up_votes.filter(user => user.id !== userId);
+
+      return await this.ideaRepository.save(idea);
+    }
+    throw new InternalServerErrorException(
+      `couldn't unUpVote, the idea maybe doesn't exist`,
+    );
+  }
+
+  async unDownVote(userId: string, id: string) {
+    const idea = await this.ideaRepository.findOne({
+      select: { down_votes: true },
+      where: { id },
+      relations: { down_votes: true },
+    });
+    if (idea) {
+      idea.down_votes = idea.down_votes.filter(user => user.id !== userId);
+      return await this.ideaRepository.save(idea);
+    }
+    throw new InternalServerErrorException(`couldn't unDownVote`);
   }
 }

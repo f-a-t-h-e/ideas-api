@@ -1,6 +1,13 @@
 import * as bcrypt from 'bcrypt';
 import { Exclude } from 'class-transformer';
-import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 
 import { CustomEntity } from '../../../shared/entities/id-create-update.entity';
 import { Idea } from '../../idea/entities/idea.entity';
@@ -23,6 +30,10 @@ export class User extends CustomEntity {
 
   @OneToMany(type => Idea, idea => idea.author)
   ideas: Array<Idea>;
+
+  @ManyToMany(type => Idea, idea => idea.id, { cascade: true })
+  @JoinTable()
+  bookmarks: Array<Idea>;
 
   @BeforeInsert()
   encrypt() {
