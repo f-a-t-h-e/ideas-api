@@ -53,12 +53,10 @@ export class UserService {
     This action adds a new user
     */
 
-  async register(createUserDto: CreateUserDto): Promise<'token'> {
+  async register(createUserDto: CreateUserDto): Promise<User> {
     try {
       const user = this.userRepository.create(createUserDto);
-      await this.userRepository.save(user);
-
-      return 'token';
+      return await this.userRepository.save(user);
     } catch (e) {
       /**
        * enum PostgresErrorCode {
@@ -79,9 +77,11 @@ export class UserService {
   /* 
     This action returns all user
     */
-  async findAll(): Promise<User[]> {
+  async findAll(page = 1): Promise<User[]> {
     const users = await this.userRepository.find({
       order: { username: 'ASC', id: 'DESC' },
+      take: 10,
+      skip: 10 * (page - 1),
     });
 
     if (users.length === 0) throw new NotFoundException('There are no users');

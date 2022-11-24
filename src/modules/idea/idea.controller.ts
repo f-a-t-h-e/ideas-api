@@ -41,8 +41,8 @@ export class IdeaController {
 
   @ApiTags('ideas')
   @Get()
-  findAll() {
-    return this.ideaService.findAll();
+  findAll(@Query('page') page: number) {
+    return this.ideaService.findAll(page);
   }
 
   @ApiTags('ideas')

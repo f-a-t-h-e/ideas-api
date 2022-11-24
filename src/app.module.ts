@@ -28,7 +28,8 @@ import { AppService } from './app.service';
       }),
     }*/),
     TypeOrmModule.forRoot({
-      logging: true,
+      // logging: true,
+      // dropSchema: true,
       type: 'postgres',
       host: 'localhost',
       port: 5432,

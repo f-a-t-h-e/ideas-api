@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -16,7 +17,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @ApiTags('comments')
-@Controller('comment')
+@Controller('api/v1/comment')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
@@ -31,14 +32,19 @@ export class CommentController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string, @User() user: any) {
+  @Delete(':comment')
+  remove(@Param('comment') id: string, @User() user: any) {
     return this.commentService.remove(user.id, id);
   }
 
-  @Get(':idea')
-  getCommentsOfIdea(@Param('idea') idea: string) {
-    return this.commentService.findAll(idea);
+  @Get('idea/:idea')
+  getCommentsOfIdea(@Param('idea') idea: string, @Query('page') page: number) {
+    return this.commentService.getAllForIdea(idea, page);
+  }
+
+  @Get('user/:user')
+  getCommentsOfUser(@Param('user') user: string, @Query('page') page: number) {
+    return this.commentService.getAllForUser(user, page);
   }
 
   @Get('api/:id')

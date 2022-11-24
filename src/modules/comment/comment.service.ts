@@ -16,9 +16,16 @@ export class CommentService {
   constructor(
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     @InjectRepository(Idea) private ideaRepository: Repository<Idea>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async create(idea: string, writer: User, createCommentDto: CreateCommentDto) {
+  async create(
+    idea: string,
+    theUser: User,
+    createCommentDto: CreateCommentDto,
+  ) {
+    const user = await this.userRepository.findOneBy({ id: theUser.id });
+    const writer = user ? user : theUser;
     const comment = this.commentRepository.create({
       idea: { id: idea },
       writer,
@@ -28,16 +35,27 @@ export class CommentService {
     return await this.findOne(comment.id);
   }
 
-  async findAll(idea: string): Promise<Comment[] | []> {
+  async getAllForIdea(idea: string, page = 1): Promise<Comment[] | []> {
     const theIdea = await this.ideaRepository.findOne({
+      order: { comments: { created_at: 'DESC', updated_at: 'DESC' } },
       where: { id: idea },
       loadEagerRelations: false,
       relations: { comments: true },
+      select: ['comments'],
     });
     if (theIdea) {
-      return theIdea.comments;
+      return theIdea.comments.slice(25 * (page - 1), 25 * page);
     }
     throw new NotFoundException(`Idea #${idea} is not found`);
+  }
+  async getAllForUser(user: string, page = 1): Promise<Comment[] | []> {
+    const comments = await this.commentRepository.find({
+      order: { created_at: 'DESC', updated_at: 'DESC' },
+      where: { writer: { id: user } },
+      take: 25,
+      skip: 25 * (page - 1),
+    });
+    return comments;
   }
 
   async findOne(id: string) {
@@ -61,5 +79,13 @@ export class CommentService {
       return this.commentRepository.delete({ id });
     }
     throw new UnauthorizedException(`you have no access to this comment`);
+  }
+
+  async getLatest(page = 1) {
+    return await this.userRepository.find({
+      order: { created_at: 'DESC', updated_at: 'DESC' },
+      take: 25,
+      skip: 25 * (page - 1),
+    });
   }
 }

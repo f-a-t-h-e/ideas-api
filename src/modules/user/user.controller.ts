@@ -1,15 +1,16 @@
 import {
   Controller,
   Get,
-  Post,
+  // Post,
   Body,
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+// import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -18,14 +19,14 @@ import { ApiTags } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('register')
-  register(@Body() createUserDto: CreateUserDto) {
-    return this.userService.register(createUserDto);
-  }
+  // @Post('register')
+  // register(@Body() createUserDto: CreateUserDto) {
+  //   return this.userService.register(createUserDto);
+  // }
 
   @Get('users')
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query('page') page: number) {
+    return this.userService.findAll(page);
   }
 
   @Get('users/:id')

@@ -27,9 +27,11 @@ export class IdeaService {
 
   async create(user: User, createIdeaDto: CreateIdeaDto): Promise<Idea> {
     try {
+      let author = await this.userRepository.findOneBy({ id: user.id });
+      author = author ? author : user;
       const idea = this.ideaRepository.create({
         ...createIdeaDto,
-        author: user,
+        author,
       });
       await this.ideaRepository.save(idea);
       return await this.findOne(idea.id);
@@ -41,12 +43,13 @@ export class IdeaService {
   /* 
     This action returns all idea
     */
-  async findAll(): Promise<any> {
+  async findAll(page = 1): Promise<any> {
     const ideas = await this.ideaRepository.find({
-      // relations: { up_votes: true, down_votes: true, author: true },
+      order: { created_at: 'DESC', updated_at: 'DESC' },
+      loadRelationIds: true,
+      take: 25,
+      skip: 25 * (page - 1),
     });
-    console.log(JSON.stringify(ideas));
-
     if (!ideas)
       throw new HttpException('There are no ideas', HttpStatus.NOT_FOUND);
     return ideas;
