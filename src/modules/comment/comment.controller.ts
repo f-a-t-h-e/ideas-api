@@ -17,12 +17,12 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @ApiTags('comments')
-@Controller('api/v1/comment')
+@Controller('api/v1/')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post(':idea')
+  @Post('comment/:idea')
   create(
     @Param('idea') idea: string,
     @User() user: any,
@@ -32,7 +32,7 @@ export class CommentController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':comment')
+  @Delete('comment/:comment')
   remove(@Param('comment') id: string, @User() user: any) {
     return this.commentService.remove(user.id, id);
   }
@@ -42,18 +42,18 @@ export class CommentController {
     return this.commentService.getAllForIdea(idea, page);
   }
 
-  @Get('user/:user')
+  @Get('user/:user/comment')
   getCommentsOfUser(@Param('user') user: string, @Query('page') page: number) {
     return this.commentService.getAllForUser(user, page);
   }
 
-  @Get('api/:id')
+  @Get('comment/:id')
   getOneComment(@Param('id') id: string) {
     return this.commentService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch('comment/:id')
   update(
     @Param('id') id: string,
     @Body() updateCommentDto: UpdateCommentDto,
