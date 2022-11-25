@@ -44,21 +44,21 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       typePaths: ['./**/*.graphql'],
+      context: ({ req }: any) => ({ req }), // YOU may need it for cookies
       cors: {
         // You need this for cookies
         origin: 'http://localhost:3000',
         credentials: true, // YOU need this for cookies
-        // context: ({ req }: { req: Request }) => ({ req }), // YOU may need it for cookies
-        formatError: (error: any) => {
-          // format error ---TO_DO--- handle errors instead (for better user experience)
-          const graphQLFormattedError = {
-            message:
-              error.extensions?.exception?.response?.message || error.message,
-            code: error.extensions?.code || 'SERVER_ERROR',
-            name: error.extensions?.exception?.name || error.name,
-          };
-          return graphQLFormattedError;
-        },
+      },
+      formatError: (error: any) => {
+        // format error ---TO_DO--- handle errors instead (for better user experience)
+        const graphQLFormattedError = {
+          message:
+            error.extensions?.exception?.response?.message || error.message,
+          code: error.extensions?.code || 'SERVER_ERROR',
+          name: error.extensions?.exception?.name || error.name,
+        };
+        return graphQLFormattedError;
       },
     }),
     IdeaModule,

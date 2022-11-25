@@ -1,13 +1,8 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Idea } from '../idea/entities/idea.entity';
 import { User } from '../user/entities/user.entity';
-import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from './entities/comment.entity';
 
@@ -19,17 +14,21 @@ export class CommentService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async create(
-    idea: string,
-    theUser: User,
-    createCommentDto: CreateCommentDto,
-  ) {
+  async create({
+    idea,
+    theUser,
+    content,
+  }: {
+    idea: string;
+    theUser: User;
+    content: string;
+  }) {
     const user = await this.userRepository.findOneBy({ id: theUser.id });
     const writer = user ? user : theUser;
     const comment = this.commentRepository.create({
       idea: { id: idea },
       writer,
-      ...createCommentDto,
+      content,
     });
     await this.commentRepository.save(comment);
     return await this.findOne(comment.id);
@@ -88,7 +87,7 @@ export class CommentService {
   async findOne(id: string) {
     return await this.commentRepository.findOne({
       where: { id },
-      loadRelationIds: true,
+      relations: ['writer', 'idea'],
     });
   }
 
@@ -100,6 +99,7 @@ export class CommentService {
   async remove(user: string, id: string) {
     const comment = await this.commentRepository.findOne({
       where: { id, writer: { id: user } },
+      relations: ['writer', 'idea'],
     });
     if (comment) {
       this.commentRepository.delete({ id });

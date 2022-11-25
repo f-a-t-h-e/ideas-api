@@ -28,7 +28,11 @@ export class CommentController {
     @UserParam() user: any,
     @Body() createCommentDto: CreateCommentDto,
   ) {
-    return this.commentService.create(idea, user, createCommentDto);
+    return this.commentService.create({
+      idea,
+      theUser: user,
+      content: createCommentDto.content,
+    });
   }
 
   @UseGuards(JwtAuthGuard)

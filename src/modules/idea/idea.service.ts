@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 
 import { CreateIdeaDto } from './dto/create-idea.dto';
+import { ResIdeaDto } from './dto/response-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { Idea } from './entities/idea.entity';
 
@@ -24,7 +25,7 @@ export class IdeaService {
     This action adds a new idea
     */
 
-  async create(user: User, createIdeaDto: CreateIdeaDto): Promise<Idea> {
+  async create(user: User, createIdeaDto: CreateIdeaDto): Promise<ResIdeaDto> {
     try {
       let author = await this.userRepository.findOneBy({ id: user.id });
       author = author ? author : user;
@@ -60,7 +61,7 @@ export class IdeaService {
     This action returns a #${id} idea
     */
 
-  async findOne(id: string): Promise<Idea> {
+  async findOne(id: string): Promise<ResIdeaDto> {
     const idea = await this.ideaRepository.findOne({
       where: { id },
       relations: {
@@ -75,7 +76,11 @@ export class IdeaService {
         `There is no idea with this id #${id}`,
         HttpStatus.NOT_FOUND,
       );
-    return idea;
+    return {
+      ...idea,
+      up_votes: idea.up_votes.length,
+      down_votes: idea.down_votes.length,
+    };
   }
 
   async findMany(queries: Partial<CreateIdeaDto>): Promise<Idea[]> {
@@ -98,7 +103,7 @@ export class IdeaService {
     userId: string,
     id: string,
     updateIdeaDto: UpdateIdeaDto,
-  ): Promise<Idea> {
+  ): Promise<ResIdeaDto> {
     const idea = await this.findOne(id);
 
     if (!idea.author) {
@@ -117,7 +122,7 @@ export class IdeaService {
   /*
   This action removes a #${id} idea
   */
-  async remove(userId: string, id: string): Promise<Idea> {
+  async remove(userId: string, id: string): Promise<ResIdeaDto> {
     const idea = await this.findOne(id);
 
     if (!idea.author) {
@@ -139,7 +144,7 @@ export class IdeaService {
       relations: { bookmarks: true },
       select: { bookmarks: true },
     });
-    if (!!user) {
+    if (!!user && user.bookmarks.filter(idea => idea.id === id).length < 1) {
       const idea = await this.ideaRepository.findOneBy({ id });
       if (idea) {
         user.bookmarks.push(idea);
@@ -147,7 +152,7 @@ export class IdeaService {
       }
       throw new NotFoundException("Couldn't find this idea");
     }
-    throw new InternalServerErrorException("coodn't bookmark");
+    throw new InternalServerErrorException("couldn't bookmark");
   }
 
   async unbookmark(userId: string, id: string) {
@@ -158,6 +163,7 @@ export class IdeaService {
     });
     if (!!user) {
       user.bookmarks = user.bookmarks.filter(idea => idea.id !== id);
+
       return await this.userRepository.save(user);
     }
     throw new InternalServerErrorException("coodn't unbookmark");
@@ -170,16 +176,8 @@ export class IdeaService {
       relations: { up_votes: true, down_votes: true },
     });
     if (!!idea) {
-      console.log(userId);
-      console.log('up');
-      console.log(idea.down_votes[0].id);
-
-      // if()
-      idea.down_votes.map(user => {
-        if (user.id === userId) return undefined;
-        console.log('hey');
-
-        return user;
+      idea.down_votes = idea.down_votes.filter(user => {
+        user.id !== userId;
       });
       if (idea.up_votes.filter(user => user.id === userId).length < 1) {
         const user = await this.userRepository.findOneBy({ id: userId });
@@ -191,7 +189,7 @@ export class IdeaService {
           );
         }
       }
-      return await this.ideaRepository.save(idea); // you don't need to return this
+      return (await this.ideaRepository.save(idea)).up_votes.length; // you don't need to return this
     }
     throw new InternalServerErrorException(
       `Couldn't UpVote, the idea maybe deleted`,
@@ -204,13 +202,12 @@ export class IdeaService {
       where: { id },
       relations: { up_votes: true, down_votes: true },
     });
-    if (!!idea) {
-      idea.up_votes.map(user => {
-        console.log('hiiiiiiiii');
 
-        if (user.id === userId) return undefined;
-        return user;
+    if (!!idea) {
+      idea.up_votes = idea.up_votes.filter(user => {
+        user.id !== userId;
       });
+
       if (idea.down_votes.filter(user => user.id === userId).length < 1) {
         const user = await this.userRepository.findOneBy({ id: userId });
         if (user) {
@@ -221,7 +218,7 @@ export class IdeaService {
           );
         }
       }
-      return await this.ideaRepository.save(idea); // you don't need to return this
+      return (await this.ideaRepository.save(idea)).down_votes.length; // you don't need to return this
     }
     throw new InternalServerErrorException(
       `Couldn't downVote, the idea maybe deleted`,
@@ -237,7 +234,7 @@ export class IdeaService {
     if (idea) {
       idea.up_votes = idea.up_votes.filter(user => user.id !== userId);
 
-      return await this.ideaRepository.save(idea);
+      return (await this.ideaRepository.save(idea)).up_votes.length;
     }
     throw new InternalServerErrorException(
       `couldn't unUpVote, the idea maybe doesn't exist`,
@@ -252,7 +249,7 @@ export class IdeaService {
     });
     if (idea) {
       idea.down_votes = idea.down_votes.filter(user => user.id !== userId);
-      return await this.ideaRepository.save(idea);
+      return (await this.ideaRepository.save(idea)).down_votes.length;
     }
     throw new InternalServerErrorException(`couldn't unDownVote`);
   }

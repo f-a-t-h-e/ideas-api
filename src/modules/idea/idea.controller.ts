@@ -18,6 +18,7 @@ import { Idea } from './entities/idea.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserParam } from '../user/user.param.decorator';
+import { ResIdeaDto } from './dto/response-idea.dto';
 
 @Controller('api/v1/ideas')
 export class IdeaController {
@@ -34,7 +35,7 @@ export class IdeaController {
   create(
     @Body() createIdeaDto: CreateIdeaDto,
     @UserParam() user: any,
-  ): Promise<Idea> {
+  ): Promise<ResIdeaDto> {
     this.Logger({ username: user.username, createIdeaDto });
     console.log(user);
 
@@ -49,7 +50,7 @@ export class IdeaController {
 
   @ApiTags('ideas')
   @Get(':id')
-  findOneById(@Param('id') id: string): Promise<Idea> {
+  findOneById(@Param('id') id: string): Promise<ResIdeaDto> {
     return this.ideaService.findOne(id);
   }
 
@@ -66,7 +67,7 @@ export class IdeaController {
     @Param('id') id: string,
     @Body() updateIdeaDto: UpdateIdeaDto,
     @UserParam() user: any,
-  ): Promise<Idea> {
+  ): Promise<ResIdeaDto> {
     const { id: userId } = user;
     this.Logger({ updateIdeaDto, user: user });
     return this.ideaService.update(userId, id, updateIdeaDto);
@@ -75,7 +76,7 @@ export class IdeaController {
   @ApiTags('ideas')
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string, @UserParam() user: any): Promise<Idea> {
+  remove(@Param('id') id: string, @UserParam() user: any): Promise<ResIdeaDto> {
     const { id: userId } = user;
     return this.ideaService.remove(userId, id);
   }
@@ -95,7 +96,7 @@ export class IdeaController {
   unbookmarkIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
     this.Logger({ id, userId });
-    return this.ideaService.bookmark(userId, id);
+    return this.ideaService.unbookmark(userId, id);
   }
 
   @ApiTags('reactions')

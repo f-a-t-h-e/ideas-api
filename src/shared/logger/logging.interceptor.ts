@@ -17,16 +17,14 @@ export class LoggingInterceptor implements NestInterceptor {
       const method = req.method;
       const url = req.url;
 
-      return next
-        .handle()
-        .pipe(
-          tap(() =>
-            Logger.log(
-              `${method} ${url} ${Date.now() - now}ms`,
-              context.getClass().name,
-            ),
-          ),
-        );
+      return next.handle().pipe(
+        tap(() => {
+          Logger.log(
+            `${method} ${url} ${Date.now() - now}ms`,
+            context.getClass().name,
+          );
+        }),
+      );
     } else {
       const ctx: any = GqlExecutionContext.create(context);
 
@@ -34,16 +32,14 @@ export class LoggingInterceptor implements NestInterceptor {
       const info = ctx.getInfo();
       // console.log(ctx);
 
-      return next
-        .handle()
-        .pipe(
-          tap(() =>
-            Logger.log(
-              `${info.parentType} "${info.fieldName}" ${Date.now() - now}ms`,
-              resolverName,
-            ),
-          ),
-        );
+      return next.handle().pipe(
+        tap(() => {
+          Logger.log(
+            `${info.parentType} "${info.fieldName}" ${Date.now() - now}ms`,
+            resolverName,
+          );
+        }),
+      );
     }
   }
 }

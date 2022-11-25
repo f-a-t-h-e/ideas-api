@@ -6,7 +6,7 @@ import { User } from '../../user/entities/user.entity';
 export class CreateIdeaDto {
   @IsEmpty()
   @ApiHideProperty()
-  id: string;
+  id?: string;
 
   @IsString()
   @IsNotEmpty()

@@ -5,12 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from './entities/comment.entity';
 import { Idea } from '../idea/entities/idea.entity';
 import { User } from '../user/entities/user.entity';
-// import { CommentResolver } from './comment.resolver';
+import { CommentResolver } from './comment.resolver';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Comment, Idea, User])],
   controllers: [CommentController],
-  providers: [CommentService /*, CommentResolver*/],
+  providers: [CommentService, CommentResolver],
   exports: [CommentService],
 })
 export class CommentModule {}
