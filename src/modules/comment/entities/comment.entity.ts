@@ -18,7 +18,7 @@ export class Comment implements CustomEntity {
   @ManyToOne(type => User, user => user.id, { onDelete: 'CASCADE' })
   writer: User;
 
-  @ManyToOne(type => Idea, idea => idea.comments, { onDelete: 'CASCADE' })
+  @ManyToOne(type => Idea, idea => idea.id, { onDelete: 'CASCADE' })
   idea: Idea;
 
   @Column('text')

@@ -16,10 +16,10 @@ import { CreateIdeaDto } from './dto/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { Idea } from './entities/idea.entity';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { User } from '../user/user.param.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UserParam } from '../user/user.param.decorator';
 
-@Controller('ideas')
+@Controller('api/v1/ideas')
 export class IdeaController {
   constructor(private readonly ideaService: IdeaService) {}
 
@@ -33,9 +33,11 @@ export class IdeaController {
   @Post()
   create(
     @Body() createIdeaDto: CreateIdeaDto,
-    @User() user: any,
+    @UserParam() user: any,
   ): Promise<Idea> {
-    this.Logger({ user, createIdeaDto });
+    this.Logger({ username: user.username, createIdeaDto });
+    console.log(user);
+
     return this.ideaService.create(user, createIdeaDto);
   }
 
@@ -63,7 +65,7 @@ export class IdeaController {
   update(
     @Param('id') id: string,
     @Body() updateIdeaDto: UpdateIdeaDto,
-    @User() user: any,
+    @UserParam() user: any,
   ): Promise<Idea> {
     const { id: userId } = user;
     this.Logger({ updateIdeaDto, user: user });
@@ -73,7 +75,7 @@ export class IdeaController {
   @ApiTags('ideas')
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string, @User() user: any): Promise<Idea> {
+  remove(@Param('id') id: string, @UserParam() user: any): Promise<Idea> {
     const { id: userId } = user;
     return this.ideaService.remove(userId, id);
   }
@@ -81,7 +83,7 @@ export class IdeaController {
   @ApiTags('reactions')
   @Post(':id/bookmark')
   @UseGuards(JwtAuthGuard)
-  bookmarkIdea(@Param('id') id: string, @User() user: any) {
+  bookmarkIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
     this.Logger({ id, userId });
     return this.ideaService.bookmark(userId, id);
@@ -90,7 +92,7 @@ export class IdeaController {
   @ApiTags('reactions')
   @Delete(':id/bookmark')
   @UseGuards(JwtAuthGuard)
-  unbookmarkIdea(@Param('id') id: string, @User() user: any) {
+  unbookmarkIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
     this.Logger({ id, userId });
     return this.ideaService.bookmark(userId, id);
@@ -99,7 +101,7 @@ export class IdeaController {
   @ApiTags('reactions')
   @Post(':id/upv_ote')
   @UseGuards(JwtAuthGuard)
-  upVoteIdea(@Param('id') id: string, @User() user: any) {
+  upVoteIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
     this.Logger({ id, userId });
     return this.ideaService.upVote(userId, id);
@@ -108,7 +110,7 @@ export class IdeaController {
   @ApiTags('reactions')
   @Delete(':id/upv_ote')
   @UseGuards(JwtAuthGuard)
-  unUpVoteIdea(@Param('id') id: string, @User() user: any) {
+  unUpVoteIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
     this.Logger({ id, userId });
     return this.ideaService.unUpVote(userId, id);
@@ -117,7 +119,7 @@ export class IdeaController {
   @ApiTags('reactions')
   @Post(':id/down_vote')
   @UseGuards(JwtAuthGuard)
-  downVoteIdea(@Param('id') id: string, @User() user: any) {
+  downVoteIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
     this.Logger({ id, userId });
     return this.ideaService.downVote(userId, id);
@@ -126,7 +128,7 @@ export class IdeaController {
   @ApiTags('reactions')
   @Delete(':id/down_vote')
   @UseGuards(JwtAuthGuard)
-  unDownVoteIdea(@Param('id') id: string, @User() user: any) {
+  unDownVoteIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
     this.Logger({ id, userId });
     return this.ideaService.unDownVote(userId, id);

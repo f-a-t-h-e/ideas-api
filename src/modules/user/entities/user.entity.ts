@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 
 import { CustomEntity } from '../../../shared/entities/id-create-update.entity';
+import { Comment } from '../../comment/entities/comment.entity';
 import { Idea } from '../../idea/entities/idea.entity';
 
 @Entity('users')
@@ -28,8 +29,11 @@ export class User extends CustomEntity {
   @Column({ unique: true, select: false })
   email: string;
 
-  @OneToMany(type => Idea, idea => idea.author)
-  ideas: Array<Idea>;
+  @OneToMany(type => Idea, idea => idea.author, { cascade: true })
+  ideas: Idea[];
+
+  @OneToMany(type => Comment, comment => comment.writer)
+  comments: Array<Comment>;
 
   @ManyToMany(type => Idea, idea => idea.id, { cascade: true })
   @JoinTable()

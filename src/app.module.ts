@@ -17,6 +17,8 @@ import { CommentModule } from './modules/comment/comment.module';
 import { LoggingInterceptor } from './shared/logger/logging.interceptor';
 import { HttpErrorFilter } from './shared/http-exception.filter';
 import { AppService } from './app.service';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 @Module({
   imports: [
@@ -38,6 +40,26 @@ import { AppService } from './app.service';
       database: 'ideas',
       entities: [Idea, User, Comment],
       synchronize: true,
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      typePaths: ['./**/*.graphql'],
+      cors: {
+        // You need this for cookies
+        origin: 'http://localhost:3000',
+        credentials: true, // YOU need this for cookies
+        // context: ({ req }: { req: Request }) => ({ req }), // YOU may need it for cookies
+        formatError: (error: any) => {
+          // format error ---TO_DO--- handle errors instead (for better user experience)
+          const graphQLFormattedError = {
+            message:
+              error.extensions?.exception?.response?.message || error.message,
+            code: error.extensions?.code || 'SERVER_ERROR',
+            name: error.extensions?.exception?.name || error.name,
+          };
+          return graphQLFormattedError;
+        },
+      },
     }),
     IdeaModule,
     UserModule,

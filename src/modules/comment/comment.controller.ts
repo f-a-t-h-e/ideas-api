@@ -10,8 +10,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { User } from '../user/user.param.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UserParam } from '../user/user.param.decorator';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -22,10 +22,10 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post('comment/:idea')
+  @Post('ideas/:idea/comment')
   create(
     @Param('idea') idea: string,
-    @User() user: any,
+    @UserParam() user: any,
     @Body() createCommentDto: CreateCommentDto,
   ) {
     return this.commentService.create(idea, user, createCommentDto);
@@ -33,11 +33,11 @@ export class CommentController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('comment/:comment')
-  remove(@Param('comment') id: string, @User() user: any) {
+  remove(@Param('comment') id: string, @UserParam() user: any) {
     return this.commentService.remove(user.id, id);
   }
 
-  @Get('idea/:idea')
+  @Get('ideas/:idea/comment')
   getCommentsOfIdea(@Param('idea') idea: string, @Query('page') page: number) {
     return this.commentService.getAllForIdea(idea, page);
   }
@@ -57,7 +57,7 @@ export class CommentController {
   update(
     @Param('id') id: string,
     @Body() updateCommentDto: UpdateCommentDto,
-    @User() user: any,
+    @UserParam() user: any,
   ) {
     return this.commentService.update(user.id, id, updateCommentDto);
   }

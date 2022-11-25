@@ -15,8 +15,8 @@ A place to see and post ideas in the style of reddit and twitter
 ## Stack
 
   <!-- - Database - PostgreSQL -->
+  <!-- - REST API - NestJS -->
 
-- REST API - NestJS
 - GraphQL API - NestJS
 - Rest Frontend - Angular with NGRX
 - GraphQL Frontend - React (Native?) with Apollo Client

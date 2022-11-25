@@ -1,7 +1,7 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -10,7 +10,10 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
   // password-local will take care of making sure that email and password are provided
   async validate(email: string, password: string) {
-    const user = await this.authService.validateUser(email, password);
+    const user = await this.authService.validateUserLocal({
+      email,
+      pass: password,
+    });
     if (!user) {
       throw new UnauthorizedException('Wrong credentials provided'); // Not necessary
     }

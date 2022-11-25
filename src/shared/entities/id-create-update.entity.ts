@@ -11,6 +11,6 @@ export class CustomEntity {
   @CreateDateColumn({ type: 'timestamp', name: 'ceated_at' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at', select: false })
+  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
   updated_at: Date;
 }

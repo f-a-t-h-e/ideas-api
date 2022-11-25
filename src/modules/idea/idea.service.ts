@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -43,15 +42,18 @@ export class IdeaService {
   /* 
     This action returns all idea
     */
-  async findAll(page = 1): Promise<any> {
+  async findAll(page = 1): Promise<Idea[]> {
     const ideas = await this.ideaRepository.find({
       order: { created_at: 'DESC', updated_at: 'DESC' },
-      loadRelationIds: true,
+      // loadRelationIds: true,
       take: 25,
       skip: 25 * (page - 1),
+      relations: { author: true, comments: true },
     });
-    if (!ideas)
+    if (ideas.length === 0)
       throw new HttpException('There are no ideas', HttpStatus.NOT_FOUND);
+    console.log(ideas);
+
     return ideas;
   }
   /* 
@@ -168,8 +170,15 @@ export class IdeaService {
       relations: { up_votes: true, down_votes: true },
     });
     if (!!idea) {
+      console.log(userId);
+      console.log('up');
+      console.log(idea.down_votes[0].id);
+
+      // if()
       idea.down_votes.map(user => {
         if (user.id === userId) return undefined;
+        console.log('hey');
+
         return user;
       });
       if (idea.up_votes.filter(user => user.id === userId).length < 1) {
@@ -197,6 +206,8 @@ export class IdeaService {
     });
     if (!!idea) {
       idea.up_votes.map(user => {
+        console.log('hiiiiiiiii');
+
         if (user.id === userId) return undefined;
         return user;
       });

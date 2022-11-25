@@ -12,11 +12,11 @@ import { UserService } from '../user/user.service';
 
 import { AuthService } from './auth.service';
 import LoginDto from './dto/logIn.dto';
-import { LocalAuthGuard } from './localAuth.guard';
+import { LocalAuthGuard } from './guards/localAuth.guard';
 import RequestWithUser from './types/requestWithUser.interface';
 
 @ApiTags('auth')
-@Controller()
+@Controller('api/v1')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -24,10 +24,16 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  register(@Body() createUserDto: CreateUserDto, @Req() req: RequestWithUser) {
-    const user = this.userService.register(createUserDto);
+  async register(
+    @Body() createUserDto: CreateUserDto,
+    @Req() req: RequestWithUser,
+  ) {
+    const user = await this.userService.register(createUserDto);
+
     const cookie = this.authService.getCookieWithJwtAccessToken(user);
     req.res?.setHeader('Set-Cookie', cookie);
+    console.log(user);
+
     return user;
   }
 

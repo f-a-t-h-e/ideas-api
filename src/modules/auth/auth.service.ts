@@ -12,16 +12,24 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async validateUser(
-    email: string,
-    pass: string,
-  ): Promise<Partial<User> | null> {
-    const user = await this.userService.getByEmail(email);
+  async validateUserLocal({
+    email,
+    pass,
+  }: {
+    email: string;
+    pass: string;
+  }): Promise<Partial<User> | null> {
+    const user = await this.userService.getOneBy({ email });
     if (user && user.password && User.comparePassword(pass, user.password)) {
       const { password, ...result } = user;
       return result;
     }
     return null;
+  }
+
+  async validateUserJWT(id: string): Promise<Partial<User> | null> {
+    const user = await this.userService.getOneBy({ id });
+    return user;
   }
 
   getCookieWithJwtAccessToken(user: any) {

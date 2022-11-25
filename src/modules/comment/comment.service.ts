@@ -43,19 +43,46 @@ export class CommentService {
       relations: { comments: true },
       select: ['comments'],
     });
+
     if (theIdea) {
       return theIdea.comments.slice(25 * (page - 1), 25 * page);
     }
-    throw new NotFoundException(`Idea #${idea} is not found`);
+    return [];
   }
+
   async getAllForUser(user: string, page = 1): Promise<Comment[] | []> {
-    const comments = await this.commentRepository.find({
-      order: { created_at: 'DESC', updated_at: 'DESC' },
-      where: { writer: { id: user } },
-      take: 25,
-      skip: 25 * (page - 1),
+    // const userComments = await this.userRepository
+    //   .createQueryBuilder('users')
+    //   .loadAllRelationIds()
+    //   .where({ id: user })
+    //   .leftJoinAndSelect(
+    //     qb =>
+    //       qb
+    //         .select()
+    //         .from('comments', 'r')
+    //         .where({ writer: user })
+    //         .orderBy({ 'r.created_at': 'DESC' })
+    //         .limit(5),
+    //     'comments',
+    //     '"comments"."id" = ANY("users"."comments")',
+    //   )
+    //   .getOne();
+    // console.log(userComments);
+
+    // if (userComments) return userComments.comments;
+    // return [];
+    const userComments = await this.userRepository.findOne({
+      order: { comments: { created_at: 'DESC', updated_at: 'DESC' } },
+      where: { id: user },
+      loadEagerRelations: false,
+      relations: { comments: true },
+      select: ['comments'],
     });
-    return comments;
+
+    if (userComments) {
+      return userComments.comments.slice(25 * (page - 1), 25 * page);
+    }
+    return [];
   }
 
   async findOne(id: string) {
@@ -66,17 +93,17 @@ export class CommentService {
   }
 
   async update(user: string, id: string, updateCommentDto: UpdateCommentDto) {
-    const comment = await this.commentRepository.update(
-      { id },
-      updateCommentDto,
-    );
+    await this.commentRepository.update({ id }, updateCommentDto);
     return this.findOne(id);
   }
 
   async remove(user: string, id: string) {
-    const comment = await this.findOne(id);
-    if (comment?.writer.id === user) {
-      return this.commentRepository.delete({ id });
+    const comment = await this.commentRepository.findOne({
+      where: { id, writer: { id: user } },
+    });
+    if (comment) {
+      this.commentRepository.delete({ id });
+      return comment;
     }
     throw new UnauthorizedException(`you have no access to this comment`);
   }
