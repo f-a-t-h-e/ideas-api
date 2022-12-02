@@ -46,16 +46,55 @@ export class IdeaService {
   async findAll(page = 1): Promise<Idea[]> {
     const ideas = await this.ideaRepository.find({
       order: { created_at: 'DESC', updated_at: 'DESC' },
-      // loadRelationIds: true,
       take: 25,
       skip: 25 * (page - 1),
       relations: { author: true, comments: true },
     });
     if (ideas.length === 0)
       throw new HttpException('There are no ideas', HttpStatus.NOT_FOUND);
-    console.log(ideas);
 
     return ideas;
+  }
+  async getAll(page = 1): Promise<ResIdeaDto[]> {
+    const ideas = await this.ideaRepository.find({
+      order: { created_at: 'DESC', updated_at: 'DESC' },
+      take: 25,
+      skip: 25 * (page - 1),
+      select: { author: { username: true, id: true } },
+      relations: { author: true },
+      loadRelationIds: { relations: ['comments', 'up_votes', 'down_votes'] },
+    });
+    if (!ideas) {
+      throw new HttpException(`There are no ideas yet`, HttpStatus.NOT_FOUND);
+    }
+
+    return ideas.map(idea => {
+      return {
+        ...idea,
+        up_votes: idea.up_votes.length,
+        down_votes: idea.down_votes.length,
+        comments: idea.comments.length,
+      };
+    });
+  }
+  async getOneById(id: string): Promise<ResIdeaDto> {
+    const idea = await this.ideaRepository.findOne({
+      where: { id },
+      select: { author: { username: true, id: true } },
+      relations: { author: true },
+      loadRelationIds: { relations: ['comments', 'up_votes', 'down_votes'] },
+    });
+    if (!idea)
+      throw new HttpException(
+        `There is no idea with this id #${id}`,
+        HttpStatus.NOT_FOUND,
+      );
+    return {
+      ...idea,
+      up_votes: idea.up_votes.length,
+      down_votes: idea.down_votes.length,
+      comments: idea.comments.length,
+    };
   }
   /* 
     This action returns a #${id} idea
@@ -80,6 +119,7 @@ export class IdeaService {
       ...idea,
       up_votes: idea.up_votes.length,
       down_votes: idea.down_votes.length,
+      comments: idea.comments.length,
     };
   }
 
@@ -189,7 +229,8 @@ export class IdeaService {
           );
         }
       }
-      return (await this.ideaRepository.save(idea)).up_votes.length; // you don't need to return this
+      await this.ideaRepository.save(idea);
+      return this.getOneById(id);
     }
     throw new InternalServerErrorException(
       `Couldn't UpVote, the idea maybe deleted`,
@@ -218,7 +259,8 @@ export class IdeaService {
           );
         }
       }
-      return (await this.ideaRepository.save(idea)).down_votes.length; // you don't need to return this
+      await this.ideaRepository.save(idea);
+      return this.getOneById(id);
     }
     throw new InternalServerErrorException(
       `Couldn't downVote, the idea maybe deleted`,
@@ -234,7 +276,8 @@ export class IdeaService {
     if (idea) {
       idea.up_votes = idea.up_votes.filter(user => user.id !== userId);
 
-      return (await this.ideaRepository.save(idea)).up_votes.length;
+      await this.ideaRepository.save(idea);
+      return this.getOneById(id);
     }
     throw new InternalServerErrorException(
       `couldn't unUpVote, the idea maybe doesn't exist`,
@@ -249,7 +292,8 @@ export class IdeaService {
     });
     if (idea) {
       idea.down_votes = idea.down_votes.filter(user => user.id !== userId);
-      return (await this.ideaRepository.save(idea)).down_votes.length;
+      await this.ideaRepository.save(idea);
+      return this.getOneById(id);
     }
     throw new InternalServerErrorException(`couldn't unDownVote`);
   }

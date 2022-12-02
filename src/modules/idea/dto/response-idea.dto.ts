@@ -1,4 +1,3 @@
-import { Comment } from '../../comment/entities/comment.entity';
 import { User } from '../../user/entities/user.entity';
 
 export class ResIdeaDto {
@@ -8,7 +7,7 @@ export class ResIdeaDto {
   author: User;
   up_votes: number;
   down_votes: number;
-  comments: Comment[];
+  comments: number;
 
   created_at: Date;
   updated_at: Date;

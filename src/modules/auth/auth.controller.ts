@@ -5,18 +5,24 @@ import {
   Req,
   HttpCode,
   Body,
+  Get,
+  Res,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { User } from '../user/entities/user.entity';
+import { UserParam } from '../user/user.param.decorator';
 import { UserService } from '../user/user.service';
+import { Response } from 'express';
 
 import { AuthService } from './auth.service';
 import LoginDto from './dto/logIn.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/localAuth.guard';
 import RequestWithUser from './types/requestWithUser.interface';
 
 @ApiTags('auth')
-@Controller('api/v1')
+@Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -49,6 +55,20 @@ export class AuthController {
     const cookie = this.authService.getCookieWithJwtAccessToken(user);
     // res.cookie('Set-Cookie', cookie);
     req.res?.setHeader('Set-Cookie', cookie);
-    return user;
+    return user; // TO_DO Make sure if you want to return the email
+  }
+
+  @Get('whoami')
+  @UseGuards(JwtAuthGuard)
+  showMe(@UserParam() user: User) {
+    return this.userService.findOne(user.id);
+  }
+
+  @Get('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('Authentication');
+    console.log('logedout');
+
+    return 'LogedOut';
   }
 }

@@ -22,7 +22,7 @@ export class UserService {
       where: { ...condition },
       select: [
         'id',
-        'email',
+        'email', // TO_DO Make sure if you want to return the email
         'username',
         'created_at',
         'updated_at',

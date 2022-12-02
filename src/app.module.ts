@@ -19,6 +19,7 @@ import { HttpErrorFilter } from './shared/http-exception.filter';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
     UserModule,
     AuthModule,
     CommentModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [

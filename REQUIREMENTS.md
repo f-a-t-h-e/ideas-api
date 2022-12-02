@@ -16,7 +16,7 @@ A place to see and post ideas in the style of reddit and twitter
 
   <!-- - Database - PostgreSQL -->
   <!-- - REST API - NestJS -->
+  <!-- - GraphQL API - NestJS -->
 
-- GraphQL API - NestJS
 - Rest Frontend - Angular with NGRX
 - GraphQL Frontend - React (Native?) with Apollo Client

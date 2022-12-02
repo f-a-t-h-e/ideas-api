@@ -41,13 +41,13 @@ export class CommentController {
     return this.commentService.remove(user.id, id);
   }
 
-  @Get('ideas/:idea/comment')
-  getCommentsOfIdea(@Param('idea') idea: string, @Query('page') page: number) {
+  @Get('ideas/:idea/comments')
+  getCommentsByIdea(@Param('idea') idea: string, @Query('page') page: number) {
     return this.commentService.getAllForIdea(idea, page);
   }
 
-  @Get('user/:user/comment')
-  getCommentsOfUser(@Param('user') user: string, @Query('page') page: number) {
+  @Get('users/:user/comments')
+  getCommentsByUser(@Param('user') user: string, @Query('page') page: number) {
     return this.commentService.getAllForUser(user, page);
   }
 

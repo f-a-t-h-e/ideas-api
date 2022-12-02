@@ -44,14 +44,14 @@ export class IdeaController {
 
   @ApiTags('ideas')
   @Get()
-  findAll(@Query('page') page: number) {
-    return this.ideaService.findAll(page);
+  getAll(@Query('page') page: number): Promise<ResIdeaDto[]> {
+    return this.ideaService.getAll(page);
   }
 
   @ApiTags('ideas')
   @Get(':id')
-  findOneById(@Param('id') id: string): Promise<ResIdeaDto> {
-    return this.ideaService.findOne(id);
+  getOneById(@Param('id') id: string): Promise<ResIdeaDto> {
+    return this.ideaService.getOneById(id);
   }
 
   @ApiTags('ideas')
@@ -100,16 +100,19 @@ export class IdeaController {
   }
 
   @ApiTags('reactions')
-  @Post(':id/upv_ote')
+  @Post(':id/up_vote')
   @UseGuards(JwtAuthGuard)
-  upVoteIdea(@Param('id') id: string, @UserParam() user: any) {
+  upVoteIdea(
+    @Param('id') id: string,
+    @UserParam() user: any,
+  ): Promise<ResIdeaDto> {
     const { id: userId } = user;
     this.Logger({ id, userId });
     return this.ideaService.upVote(userId, id);
   }
 
   @ApiTags('reactions')
-  @Delete(':id/upv_ote')
+  @Delete(':id/up_vote')
   @UseGuards(JwtAuthGuard)
   unUpVoteIdea(@Param('id') id: string, @UserParam() user: any) {
     const { id: userId } = user;
