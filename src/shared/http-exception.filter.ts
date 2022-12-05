@@ -68,7 +68,7 @@ export class HttpErrorFilter implements ExceptionFilter {
 
       console.log('from http-exception.filter ^');
     } else {
-      // const ctx = GqlExecutionContext.create(host);
+      // const ctx = GqlExecutionContext.create(host)
       console.log('Go to http-exception.filter');
     }
   }
