@@ -49,7 +49,7 @@ import { GatewayModule } from './gateway/gateway.module';
       context: ({ req }: any) => ({ req }), // YOU may need it for cookies
       cors: {
         // You need this for cookies
-        origin: 'http://localhost:3000',
+        origin: 'https://ideas-api.up.railway.app/',
         credentials: true, // YOU need this for cookies
       },
       formatError: (error: any) => {
