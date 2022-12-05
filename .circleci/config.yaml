@@ -1,0 +1,53 @@
+version: 2.1
+name: Node.js CI
+orbs:
+  node: circleci/node@5.0.2
+jobs:
+  build:
+    docker:
+      - image: 'cimg/node:16.10'
+    steps:
+      - node/install:
+          node-version: '16.10'
+      - checkout
+      - run: echo $(node --version)
+      - run: echo $(npm --version)
+      - run: echo "The present working directory is $( pwd; )"
+      - run: yarn
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+  deploy:
+    docker:
+      - image: 'cimg/node:16.10'
+    steps:
+      - node/install:
+          node-version: '16.10'
+      - checkout
+      - run: yarn install --frozen-lockfile
+      - run: yarn add date-fns
+      - run: npm i -g @railway/cli
+      - run: railway up
+workflows:
+  nest-prisma:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - main
+      - hold:
+          filters:
+            branches:
+              only:
+                - main
+          type: approval
+          requires:
+            - build
+      - deploy:
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - hold
