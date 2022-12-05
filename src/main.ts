@@ -22,9 +22,9 @@ async function bootstrap() {
   );
   app.enableCors({
     origin: [
-      'http://localhost:4200', // angular
-      'http://localhost:4000', // react
-      'http://localhost:8081', // react-native
+      // 'http://localhost:4200', // angular
+      // 'http://localhost:4000', // react
+      // 'http://localhost:8081', // react-native
     ],
     credentials: true, // You forgot you need cookies on the frontend aswell -_-!
   });
