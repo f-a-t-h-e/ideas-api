@@ -41,7 +41,7 @@ import { GatewayModule } from './gateway/gateway.module';
       database: process.env.DB_NAME,
       entities: [Idea, User, Comment],
       ssl: true,
-      // synchronize: true,
+      synchronize: true,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
