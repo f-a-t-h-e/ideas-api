@@ -8,7 +8,7 @@ import { GatewayService } from './gateway.service';
 import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway(3001)
+@WebSocketGateway(31, { namespace: 'chat' })
 export class GatewayGateway {
   @WebSocketServer()
   server: Server;
